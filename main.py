@@ -113,7 +113,7 @@ class MemoryManager:
 
 class AIManager:
     def __init__(self, memory):
-        self.api_key = "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"
+        self.api_key = os.environ.get('OPENROUTER_API_KEY', 'YOUR_API_KEY_HERE')
         self.url = "https://openrouter.ai/api/v1/chat/completions"
         self.memory = memory
         self.headers = {
