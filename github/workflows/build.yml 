@@ -27,6 +27,10 @@ jobs:
       run: |
         pip install --upgrade buildozer cython==0.29.36
 
+    - name: Replace API Key with Secret
+      run: |
+        sed -i "s/YOUR_API_KEY_HERE/${{ secrets.OPENROUTER_API_KEY }}/g" main.py
+
     - name: Build APK with Buildozer
       run: |
         yes y | buildozer android debug
