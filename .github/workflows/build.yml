@@ -13,18 +13,38 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Build with Buildozer
-      uses: kivy/buildozer@master
+    - name: Set up Python
+      uses: actions/setup-python@v5
       with:
-        command: android debug
-        buildozer-version: 1.6.0
-        requirements: python3,kivy
-        sdk: '33'
-        minapi: '21'
-        ndk: '23b'
+        python-version: '3.10'
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y \
+          build-essential git wget libffi-dev libssl-dev \
+          autoconf automake libtool pkg-config zlib1g-dev \
+          unzip openjdk-17-jdk expect
+        
+        # تثبيت Buildozer
+        pip install buildozer cython==0.29.36
+        
+        # قبول التراخيص بطريقة مختلفة
+        yes | sdkmanager --licenses > /dev/null 2>&1 || true
+
+    - name: Build APK
+      run: |
+        # استخدام expect للتعامل مع Buildozer
+        expect << 'EOF'
+        set timeout 3600
+        spawn buildozer -v android debug
+        expect eof
+        EOF
+      timeout-minutes: 45
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: riy-agent-apk
         path: bin/*.apk
+        if-no-files-found: error
