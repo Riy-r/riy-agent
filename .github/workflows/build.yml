@@ -1,50 +1,47 @@
-name: Build Riy Agent APK
+name: CI
+
+# Runs on every pull request, every push to main, and manually from the
+# Actions tab. It verifies the Expo (React Native) app compiles, then
+# bundles it for Android and uploads the bundle as an artifact.
 
 on:
+  pull_request:
   push:
-    branches: [ "main" ]
+    branches: [main]
   workflow_dispatch:
 
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
 jobs:
-  build:
+  verify:
+    name: Typecheck & bundle (Android)
     runs-on: ubuntu-22.04
-    
+    timeout-minutes: 30
+
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version: '3.10'
+      - name: Set up Bun
+        uses: oven-sh/setup-bun@v2
 
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y \
-          build-essential git wget libffi-dev libssl-dev \
-          autoconf automake libtool pkg-config zlib1g-dev \
-          unzip openjdk-17-jdk expect
-        
-        # تثبيت Buildozer
-        pip install buildozer cython==0.29.36
-        
-        # قبول التراخيص بطريقة مختلفة
-        yes | sdkmanager --licenses > /dev/null 2>&1 || true
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
 
-    - name: Build APK
-      run: |
-        # استخدام expect للتعامل مع Buildozer
-        expect << 'EOF'
-        set timeout 3600
-        spawn buildozer -v android debug
-        expect eof
-        EOF
-      timeout-minutes: 45
+      - name: Typecheck
+        run: bun run typecheck
 
-    - name: Upload APK
-      uses: actions/upload-artifact@v4
-      with:
-        name: riy-agent-apk
-        path: bin/*.apk
-        if-no-files-found: error
+      - name: Bundle for Android (Metro/Hermes)
+        run: bunx expo export --platform android --output-dir dist-android
+
+      - name: Upload Android bundle
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-bundle
+          path: dist-android
+          if-no-files-found: error
