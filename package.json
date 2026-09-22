@@ -1,0 +1,36 @@
+{
+  "name": "my-ai-agent",
+  "version": "1.1.0",
+  "main": "expo-router/entry",
+  "private": true,
+  "scripts": {
+    "start": "expo start --port 8081",
+    "android": "expo start --port 8081",
+    "ios": "expo start --port 8081",
+    "web": "expo start --port 8081 --web",
+    "typecheck": "tsc --noEmit",
+    "doctor": "npx expo-doctor"
+  },
+  "dependencies": {
+    "@expo/vector-icons": "~15.1.1",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "expo": "~57.0.23",
+    "expo-audio": "~57.0.5",
+    "expo-constants": "~57.0.18",
+    "expo-linking": "~57.0.10",
+    "expo-router": "~57.0.21",
+    "expo-speech": "~57.0.3",
+    "expo-status-bar": "~57.0.1",
+    "expo-updates": "~57.0.12",
+    "react": "19.2.3",
+    "react-native": "0.86.3",
+    "react-native-gesture-handler": "~3.3.0",
+    "react-native-reanimated": "~4.6.0",
+    "react-native-safe-area-context": "~5.10.0",
+    "react-native-screens": "~4.28.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.2.0",
+    "typescript": "~5.9.2"
+  }
+}

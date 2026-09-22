@@ -1,0 +1,28 @@
+# Git ignore for the My AI Agent app.
+# Protects secrets (.env) and excludes build output.
+
+# dependencies
+node_modules/
+
+# Expo / React Native build output
+.expo/
+dist/
+web-build/
+android/
+ios/
+
+# secrets - NEVER commit your API key
+.env
+.env.local
+
+# OS noise
+.DS_Store
+Thumbs.db
+
+# logs
+*.log
+npm-debug.*
+yarn-error.*
+
+# TypeScript
+*.tsbuildinfo
