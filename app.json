@@ -1,0 +1,45 @@
+{
+  "expo": {
+    "name": "My AI Agent",
+    "slug": "my-ai-agent",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "newArchEnabled": true,
+    "splash": {
+      "image": "./assets/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#0B0E14"
+    },
+    "ios": {
+      "supportsTablet": true,
+      "bundleIdentifier": "com.myaiagent.app",
+      "infoPlist": {
+        "NSMicrophoneUsageDescription": "My AI Agent needs the microphone so you can talk to your AI agent."
+      }
+    },
+    "android": {
+      "package": "com.myaiagent.app",
+      "edgeToEdgeEnabled": true,
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0B0E14"
+      }
+    },
+    "web": {
+      "bundler": "metro",
+      "favicon": "./assets/favicon.png"
+    },
+    "scheme": "myaiagent",
+    "plugins": [
+      "expo-router",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow My AI Agent to access your microphone so you can talk to your agent."
+        }
+      ]
+    ]
+  }
+}
