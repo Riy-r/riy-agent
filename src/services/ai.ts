@@ -13,6 +13,7 @@
 import {
   CHAT_MODEL,
   OPENAI_BASE_URL,
+  proxyHeaders,
   CONTEXT_WINDOW,
 } from "@/constants/config";
 import type {
@@ -146,6 +147,7 @@ export async function sendChat(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...proxyHeaders(),
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(body),
@@ -204,6 +206,7 @@ export async function extractFacts(
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        ...proxyHeaders(),
         Authorization: `Bearer ${apiKey}`,
       },
       body: JSON.stringify(body),

@@ -32,6 +32,14 @@ export const OPENAI_BASE_URL = process.env.EXPO_PUBLIC_API_PROXY_URL
   ? `${process.env.EXPO_PUBLIC_API_PROXY_URL.replace(/\/$/, "")}/v1`
   : "https://api.openai.com/v1";
 
+// Must match PROXY_TOKEN on the server, if the server sets one.
+const PROXY_TOKEN = process.env.EXPO_PUBLIC_API_PROXY_TOKEN || "";
+
+/** Extra header the proxy needs when PROXY_TOKEN is set. Empty otherwise. */
+export function proxyHeaders(): Record<string, string> {
+  return PROXY_TOKEN ? { "x-proxy-token": PROXY_TOKEN } : {};
+}
+
 // ---- How many recent messages we send as short-term context ----
 // (10 recent messages is a good balance of quality vs. token cost)
 export const CONTEXT_WINDOW = 10;

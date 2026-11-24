@@ -15,7 +15,7 @@
 import * as FileSystem from "expo-file-system/legacy";
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 import * as Speech from "expo-speech";
-import { OPENAI_BASE_URL, TTS_MODEL } from "@/constants/config";
+import { OPENAI_BASE_URL, TTS_MODEL, proxyHeaders } from "@/constants/config";
 import { getApiKey, AgentError } from "@/services/ai";
 import { isArabic } from "@/utils/sanitize";
 
@@ -185,6 +185,7 @@ async function speakWithOpenAI(
     response = await fetch(`${OPENAI_BASE_URL}/audio/speech`, {
       method: "POST",
       headers: {
+        ...proxyHeaders(),
         Authorization: `Bearer ${apiKey}`,
         "Content-Type": "application/json",
       },
