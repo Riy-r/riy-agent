@@ -26,7 +26,11 @@ export const STT_MODEL = "whisper-1";
 export const TTS_MODEL = "gpt-4o-mini-tts";
 
 // ---- OpenAI API endpoints ----
-export const OPENAI_BASE_URL = "https://api.openai.com/v1";
+// If EXPO_PUBLIC_API_PROXY_URL is set (see server/README.md), requests go to
+// your own proxy, which holds the real key. The proxy URL is not a secret.
+export const OPENAI_BASE_URL = process.env.EXPO_PUBLIC_API_PROXY_URL
+  ? `${process.env.EXPO_PUBLIC_API_PROXY_URL.replace(/\/$/, "")}/v1`
+  : "https://api.openai.com/v1";
 
 // ---- How many recent messages we send as short-term context ----
 // (10 recent messages is a good balance of quality vs. token cost)

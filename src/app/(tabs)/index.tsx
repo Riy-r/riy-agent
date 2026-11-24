@@ -47,7 +47,9 @@ export default function ChatScreen() {
   const t = translations[settings.language];
 
   // Inlined at build time; null = user hasn't added a key yet.
-  const hasApiKey = Boolean(process.env.EXPO_PUBLIC_OPENAI_API_KEY);
+  const hasApiKey = Boolean(
+    process.env.EXPO_PUBLIC_OPENAI_API_KEY || process.env.EXPO_PUBLIC_API_PROXY_URL,
+  );
 
   const {
     messages,

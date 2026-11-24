@@ -24,6 +24,9 @@ import { isArabic } from "@/utils/sanitize";
 
 /** Where the API key comes from (never hardcoded!). */
 export function getApiKey(): string | null {
+  // With a proxy, the app holds no key. The proxy adds its own, so any
+  // placeholder works here.
+  if (process.env.EXPO_PUBLIC_API_PROXY_URL) return "proxy";
   const key = process.env.EXPO_PUBLIC_OPENAI_API_KEY;
   return key && key.trim().length > 10 ? key.trim() : null;
 }
