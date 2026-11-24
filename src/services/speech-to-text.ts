@@ -10,7 +10,7 @@
  * - `language` should be "en" or "ar". Passing it improves accuracy a lot.
  */
 
-import { OPENAI_BASE_URL, STT_MODEL } from "@/constants/config";
+import { OPENAI_BASE_URL, STT_MODEL, proxyHeaders } from "@/constants/config";
 import { getApiKey, AgentError } from "@/services/ai";
 
 /**
@@ -46,7 +46,7 @@ export async function transcribeAudio(
   try {
     response = await fetch(`${OPENAI_BASE_URL}/audio/transcriptions`, {
       method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}` },
+      headers: { ...proxyHeaders(), Authorization: `Bearer ${apiKey}` },
       body: form,
     });
   } catch {

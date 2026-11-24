@@ -37,7 +37,9 @@ your key and your billing. Before deploying it publicly, do at least one of
 these:
 
 1. Set `PROXY_TOKEN` on the server. Clients must then send the header
-   `x-proxy-token`. Note that any token placed in the app is visible inside
+   `x-proxy-token`. The app sends it when you set
+   `EXPO_PUBLIC_API_PROXY_TOKEN` in its `.env` to the same value. Note that
+   any token placed in the app is visible inside
    the APK, so this is a speed bump, not real security.
 2. Add per-user auth, for example a sign-in with a session check.
 3. Add rate limiting at the hosting platform.

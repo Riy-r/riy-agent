@@ -30,6 +30,7 @@ my-ai-agent/
 ├── app.json                  Expo app configuration
 ├── package.json              Dependencies and scripts
 ├── assets/                   Icons and splash images
+├── server/                   Optional API proxy (keeps the key off the phone)
 └── src/
     ├── app/                  Screens (file-based routing)
     │   ├── _layout.tsx       Root layout + RTL handling
@@ -121,21 +122,27 @@ The app opens on your phone. Talk to your agent! 🎉
 
 - The API key is read from **environment variables only**
   (`EXPO_PUBLIC_OPENAI_API_KEY`) — never hardcoded in the source.
+- **Recommended for any public build:** run the included proxy in
+  `server/`, which holds the key on the server. Set
+  `EXPO_PUBLIC_API_PROXY_URL` in `.env` to route calls through it. See
+  [`server/README.md`](server/README.md) for setup and the limits of the
+  proxy (it has no user authentication yet).
 - All user input is sanitized (control characters stripped, length
   capped) before being stored or sent — see `src/utils/sanitize.ts`.
 - Harmful requests get an instant local refusal (works even offline),
   and the AI model applies its own safety rules on top.
 - "Forget everything about me" in Settings wipes all local data.
 
-> 💡 For a production release, move the OpenAI calls behind a small
-> backend proxy so the key never ships inside the app. This starter
-> keeps everything local on purpose, to stay simple for learning.
+> 💡 Without the proxy, the key is bundled inside the app, and anyone who
+> unpacks the APK can read it. This starter works without a server on
+> purpose, to stay simple for learning. Use the proxy before sharing a build.
 
 ## 🔒 Privacy
 
 - **Stored on your device:** conversation memories (AsyncStorage) and
   settings. Nothing is saved to a server owned by this project.
-- **Sent to OpenAI:**
+- **Sent to OpenAI:** (directly, or through your own proxy if
+  `EXPO_PUBLIC_API_PROXY_URL` is set; the proxy only forwards and does not store)
   - Voice recordings, for speech-to-text (Whisper).
   - Your current message, the last 10 messages, and your saved
     memories, for the reply (GPT-4o mini).
@@ -207,7 +214,8 @@ eas build -p android --profile production
 
 | Problem | Fix |
 | --- | --- |
-| "Missing API key" alert | Create `.env` with your key, restart `npm start` |
+| "Missing API key" alert | Create `.env` with your key (or `EXPO_PUBLIC_API_PROXY_URL`), restart `npm start` |
+| Proxy returns 401 or 502 | Check `OPENAI_API_KEY` and `PROXY_TOKEN` on the server, and the proxy URL in `.env` |
 | Phone can't connect | Make sure phone and computer are on the same Wi-Fi |
 | No sound on iOS | Turn off the silent switch (device TTS respects it) |
 | Arabic layout looks odd | Change language in Settings — the app reloads once to flip RTL |
