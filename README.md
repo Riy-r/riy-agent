@@ -131,6 +131,38 @@ The app opens on your phone. Talk to your agent! 🎉
 > backend proxy so the key never ships inside the app. This starter
 > keeps everything local on purpose, to stay simple for learning.
 
+## 🔒 Privacy
+
+- **Stored on your device:** conversation memories (AsyncStorage) and
+  settings. Nothing is saved to a server owned by this project.
+- **Sent to OpenAI:**
+  - Voice recordings, for speech-to-text (Whisper).
+  - Your current message, the last 10 messages, and your saved
+    memories, for the reply (GPT-4o mini).
+  - Your messages again, for fact extraction that updates memory.
+  - Reply text, when using OpenAI voices for text-to-speech.
+- Anything sent to OpenAI is governed by OpenAI's own data policies.
+  Check them at https://openai.com/policies before using the app with
+  real personal information.
+- The app has no built-in account system, analytics, or crash reporting.
+
+## 💰 Costs
+
+Every reply and voice message is billed by OpenAI to the account that
+owns the API key. Prices change, so check the current rates at
+https://openai.com/api/pricing before you start.
+
+To avoid surprise bills:
+
+1. Set a monthly **usage limit** in the OpenAI dashboard
+   (Settings → Limits).
+2. Turn on email alerts for usage thresholds.
+3. Use the offline device voice in Settings to avoid TTS charges.
+4. Keep the context size low in `src/constants/config.ts`, since each
+   message resends recent history.
+
+The app does not track spending on its own.
+
 ---
 
 ## 📦 Build for Android (APK for sharing / Play Store)
