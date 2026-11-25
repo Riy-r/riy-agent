@@ -138,7 +138,7 @@ export async function sendChat(
     model: CHAT_MODEL,
     messages: [{ role: "system" as const, content: systemPrompt }, ...context],
     temperature: 0.7,
-    max_tokens: 800,
+    max_tokens: 2000,
   };
 
   let response: Response;

@@ -17,10 +17,10 @@
  */
 
 // ---- The agent "brain" (fast, cheap, multilingual: English + Arabic) ----
-export const CHAT_MODEL = "gpt-4o-mini";
+export const CHAT_MODEL = "openai/gpt-oss-120b";
 
 // ---- Speech-to-text model (turns your voice recording into text) ----
-export const STT_MODEL = "whisper-1";
+export const STT_MODEL = "whisper-large-v3";
 
 // ---- Text-to-speech model (makes the agent talk back) ----
 export const TTS_MODEL = "gpt-4o-mini-tts";
