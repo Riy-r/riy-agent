@@ -25,9 +25,6 @@ export async function transcribeAudio(
   const apiKey = getApiKey();
   if (!apiKey) throw new AgentError("Missing API key");
 
-  const info = await FileSystem.getInfoAsync(fileUri);
-  console.log("[stt] file exists:", info.exists, "size:", info.exists ? info.size : 0);
-
   let result: FileSystem.FileSystemUploadResult;
   try {
     result = await FileSystem.uploadAsync(
