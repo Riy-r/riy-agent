@@ -1,15 +1,15 @@
 /**
  * speech-to-text.ts
  * ---------------------------------------------------------------------------
- * Turns a voice recording into text using OpenAI's Whisper API.
+ * Turns a voice recording into text using Whisper (via the proxy or OpenAI).
  *
- * Pipeline: microphone -> .m4a file -> Whisper API -> text
+ * Pipeline: microphone -> .m4a file -> multipart upload -> transcript
  *
- * Notes:
- * - OpenAI accepts files up to 25 MB (we cap recordings at 60s in config).
- * - `language` should be "en" or "ar". Passing it improves accuracy a lot.
+ * The file is uploaded straight from disk with expo-file-system. Reading it
+ * through fetch().blob() produced an empty 14-byte body on Android.
  */
 
+import * as FileSystem from "expo-file-system/legacy";
 import { OPENAI_BASE_URL, STT_MODEL, proxyHeaders } from "@/constants/config";
 import { getApiKey, AgentError } from "@/services/ai";
 
@@ -25,44 +25,41 @@ export async function transcribeAudio(
   const apiKey = getApiKey();
   if (!apiKey) throw new AgentError("Missing API key");
 
-  // --- 1. Read the recorded file as bytes (works on Android, iOS, web) ---
-  const fileResponse = await fetch(fileUri);
-  const blob = await fileResponse.blob();
-  console.log("[stt] blob size:", blob.size, "type:", blob.type);
+  const info = await FileSystem.getInfoAsync(fileUri);
+  console.log("[stt] file exists:", info.exists, "size:", info.exists ? info.size : 0);
 
-  // --- 2. Build the multipart form that Whisper expects ---
-  const form = new FormData();
-  // Send the Blob we already read. The old {uri, name, type} object is
-  // rejected by current React Native ("Unsupported FormDataPart").
-  form.append("file", blob, "recording.m4a");
-  form.append("model", STT_MODEL);
-  // Language hint: big accuracy boost for Arabic and English.
-  form.append("language", language === "ar" ? "ar" : "en");
-  form.append("prompt", "Transcribe exactly what the user said.");
-
-  // --- 3. Send it to the API ---
-  let response: Response;
+  let result: FileSystem.FileSystemUploadResult;
   try {
-    response = await fetch(`${OPENAI_BASE_URL}/audio/transcriptions`, {
-      method: "POST",
-      headers: { ...proxyHeaders(), Authorization: `Bearer ${apiKey}` },
-      body: form,
-    });
+    result = await FileSystem.uploadAsync(
+      `${OPENAI_BASE_URL}/audio/transcriptions`,
+      fileUri,
+      {
+        httpMethod: "POST",
+        uploadType: FileSystem.FileSystemUploadType.MULTIPART,
+        fieldName: "file",
+        mimeType: "audio/m4a",
+        parameters: {
+          model: STT_MODEL,
+          language: language === "ar" ? "ar" : "en",
+          prompt: "Transcribe exactly what the user said.",
+        },
+        headers: { ...proxyHeaders(), Authorization: `Bearer ${apiKey}` },
+      }
+    );
   } catch (err) {
     console.warn("[stt] network error:", String(err));
     throw new AgentError("Network request failed");
   }
 
-  if (!response.ok) {
-    const detail = await response.text().catch(() => "");
-    console.warn("[stt] HTTP", response.status, detail.slice(0, 500));
-    throw new AgentError(`API error ${response.status}`);
+  if (result.status < 200 || result.status >= 300) {
+    console.warn("[stt] HTTP", result.status, result.body.slice(0, 500));
+    throw new AgentError(`API error ${result.status}`);
   }
 
-  const data = (await response.json()) as { text?: string };
+  const data = JSON.parse(result.body) as { text?: string };
   const text = (data.text ?? "").trim();
   if (!text) {
-    console.warn("[stt] empty transcript:", JSON.stringify(data).slice(0, 300));
+    console.warn("[stt] empty transcript:", result.body.slice(0, 300));
     throw new AgentError("Empty transcript");
   }
   return text;
