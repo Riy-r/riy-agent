@@ -25,6 +25,7 @@ export function useVoiceRecorder() {
   const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
   const [isRecording, setIsRecording] = useState(false);
   const maxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const startedAt = useRef<number>(0);
 
   // Configure the audio session once (allows recording + playback).
   useEffect(() => {
@@ -51,6 +52,7 @@ export function useVoiceRecorder() {
 
       await recorder.prepareToRecordAsync();
       recorder.record();
+      startedAt.current = Date.now();
       setIsRecording(true);
 
       // Safety: stop automatically after MAX_RECORDING_SECONDS.
@@ -75,6 +77,12 @@ export function useVoiceRecorder() {
 
     try {
       await recorder.stop();
+      console.log(
+        "[rec] stopped after ms:",
+        Date.now() - startedAt.current,
+        "uri:",
+        recorder.uri ?? "none"
+      );
       return recorder.uri ?? null;
     } catch {
       return null;
