@@ -152,12 +152,15 @@ export async function sendChat(
       },
       body: JSON.stringify(body),
     });
-  } catch {
+  } catch (err) {
+    console.warn("[chat] network error:", String(err));
     throw new AgentError("Network request failed");
   }
 
   if (!response.ok) {
     // 401 = bad key, 429 = out of credit / rate limit, other = server issue.
+    const detail = await response.text().catch(() => "");
+    console.warn("[chat] HTTP", response.status, detail.slice(0, 500));
     throw new AgentError(`API error ${response.status}`);
   }
 
@@ -166,7 +169,10 @@ export async function sendChat(
   };
 
   const reply = data.choices?.[0]?.message?.content?.trim();
-  if (!reply) throw new AgentError("Empty reply");
+  if (!reply) {
+    console.warn("[chat] empty reply:", JSON.stringify(data).slice(0, 500));
+    throw new AgentError("Empty reply");
+  }
 
   return reply;
 }
