@@ -30,7 +30,8 @@ export default function RootLayout() {
 
 function AppShell() {
   const { settings, ready } = useSettings();
-  useDirection(settings.language);
+  // Wait for saved settings first; see useDirection.
+  useDirection(ready ? settings.language : null);
 
   if (!ready) {
     return (

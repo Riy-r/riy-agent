@@ -17,18 +17,25 @@ import { useEffect, useRef } from "react";
 import { I18nManager } from "react-native";
 import type { AppLanguage } from "@/i18n/translations";
 
-export function useDirection(language: AppLanguage) {
-  // Remember the first language we see, so we only reload when the
-  // user actually CHANGES it (not on every app start).
-  const initial = useRef<AppLanguage>(language);
+/**
+ * Pass `null` until the saved settings have loaded. Otherwise the default
+ * language ("en") is seen first, then the saved one ("ar") arrives, which
+ * looks like a user change and causes a reload on every start (a loop).
+ */
+export function useDirection(language: AppLanguage | null) {
+  // The first real (loaded) language is the baseline, not a user change.
+  const initial = useRef<AppLanguage | null>(null);
 
   useEffect(() => {
+    if (language === null) return;
+    if (initial.current === null) initial.current = language;
+
     I18nManager.allowRTL(true);
 
     const wantRtl = language === "ar";
     if (I18nManager.isRTL !== wantRtl) {
       I18nManager.forceRTL(wantRtl);
-      if (initial.current !== language) {
+      if (initial.current !== null && initial.current !== language) {
         // Language was changed by the user -> reload to apply mirroring.
         // (Expo's Updates API reloads the JS bundle instantly.)
         import("expo-updates")
