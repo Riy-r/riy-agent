@@ -84,6 +84,7 @@ export function buildSystemPrompt(
     "- Be warm and encouraging. Ask a follow-up question when the request is unclear.",
     "- Keep answers concise (2-6 sentences) because they may be read aloud.",
     "- Use plain text only: no markdown, no bullet symbols, no emojis spam (1 emoji max).",
+    "- You can search the web. Search for news, prices, scores, or anything that may have changed recently. Answer from what you find and say so briefly.",
   ];
 
   // Which language to answer in.
@@ -139,6 +140,10 @@ export async function sendChat(
     messages: [{ role: "system" as const, content: systemPrompt }, ...context],
     temperature: 0.7,
     max_tokens: 2000,
+    // Built-in web search (Groq gpt-oss). The model searches when it needs
+    // current facts, such as news, prices or today's date.
+    tools: [{ type: "browser_search" }],
+    reasoning_effort: "low",
   };
 
   let response: Response;
@@ -168,7 +173,11 @@ export async function sendChat(
     choices?: { message?: { content?: string } }[];
   };
 
-  const reply = data.choices?.[0]?.message?.content?.trim();
+  // Search results come back with inline citation markers like 【2†L6-L10】.
+  // Strip them so the reply reads (and is spoken) cleanly.
+  const reply = data.choices?.[0]?.message?.content
+    ?.replace(/【[^】]*】/g, "")
+    .trim();
   if (!reply) {
     console.warn("[chat] empty reply:", JSON.stringify(data).slice(0, 500));
     throw new AgentError("Empty reply");
