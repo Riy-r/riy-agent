@@ -106,8 +106,15 @@ export async function speak(
 
   if (voice.engine === "device") {
     await speakWithDevice(text, language, voice);
-  } else {
+    return;
+  }
+
+  // If the online voice fails (no credit, unsupported by the provider, no
+  // network), fall back to the free device voice instead of going silent.
+  try {
     await speakWithOpenAI(text, language, voice);
+  } catch {
+    await speakWithDevice(text, language, getVoiceById("device-female"));
   }
 }
 
