@@ -30,6 +30,7 @@ import {
   sendChat,
 } from "@/services/ai";
 import { transcribeAudio } from "@/services/speech-to-text";
+import { generateVideo } from "@/services/video";
 import { speak } from "@/services/text-to-speech";
 import { sanitizeTranscript, sanitizeUserInput } from "@/utils/sanitize";
 import { withName, type AppLanguage, type Translations } from "@/i18n/translations";
@@ -135,6 +136,30 @@ export function useChat(settings: Settings, t: Translations) {
     [settings.memoryEnabled, speakReply, t]
   );
 
+  // ---- Video turn: "/video <description>" ----
+  const runVideoTurn = useCallback(
+    async (prompt: string) => {
+      setIsThinking(true);
+      try {
+        const fileUri = await generateVideo(prompt);
+        const updated = await appendMessage(
+          "assistant",
+          `Your video is ready and saved on this phone: ${fileUri}`
+        );
+        setMessages(updated);
+      } catch (error) {
+        const message =
+          error instanceof AgentError && error.message.includes("API key")
+            ? t.apiMissing
+            : t.networkError;
+        Alert.alert(withName(t.chatTitle, settings.agentName), message);
+      } finally {
+        setIsThinking(false);
+      }
+    },
+    [settings.agentName, t]
+  );
+
   // ---- Public: send a typed message ----
   const send = useCallback(
     async (rawText: string) => {
@@ -147,9 +172,15 @@ export function useChat(settings: Settings, t: Translations) {
       const updated = await appendMessage("user", text);
       setMessages(updated);
 
+      const videoMatch = text.match(/^\/video\s+([\s\S]+)/i);
+      if (videoMatch) {
+        await runVideoTurn(videoMatch[1]);
+        return;
+      }
+
       await runAgentTurn(text, language);
     },
-    [settings.language, runAgentTurn]
+    [settings.language, runAgentTurn, runVideoTurn]
   );
 
   // ---- Public: send a voice recording ----

@@ -13,8 +13,11 @@
  *   PROXY_TOKEN=some-secret      optional, if set, clients must send
  *                                header "x-proxy-token: <value>"
  *   OPENAI_UPSTREAM=https://...  optional, default https://api.openai.com
+ *   GEMINI_API_KEY=...           optional, enables video creation (Gemini)
+ *   GEMINI_UPSTREAM=https://...  optional, default https://generativelanguage.googleapis.com
  *
- * Only the three endpoints the app uses are allowed. Everything else is 404.
+ * Only the endpoints the app uses are allowed. Everything else is 404.
+ * At least one of OPENAI_API_KEY or GEMINI_API_KEY must be set.
  */
 
 import http from "node:http";
@@ -22,19 +25,26 @@ import http from "node:http";
 const PORT = Number(process.env.PORT || 8787);
 const UPSTREAM = (process.env.OPENAI_UPSTREAM || "https://api.openai.com").replace(/\/$/, "");
 const API_KEY = process.env.OPENAI_API_KEY || "";
+const GEMINI_UPSTREAM = (process.env.GEMINI_UPSTREAM || "https://generativelanguage.googleapis.com").replace(/\/$/, "");
+const GEMINI_KEY = process.env.GEMINI_API_KEY || "";
 const PROXY_TOKEN = process.env.PROXY_TOKEN || "";
 
 // Requests bigger than this are refused. Voice clips are the largest payload.
 const MAX_BODY_BYTES = 25 * 1024 * 1024;
 
+// Each route says where it goes and which key it uses.
+const OPENAI_ROUTE = { upstream: UPSTREAM, auth: () => ({ Authorization: `Bearer ${API_KEY}` }), enabled: () => !!API_KEY };
+const GEMINI_ROUTE = { upstream: GEMINI_UPSTREAM, auth: () => ({ "x-goog-api-key": GEMINI_KEY }), enabled: () => !!GEMINI_KEY };
+
 const ALLOWED = new Map([
-  ["POST /v1/chat/completions", true],
-  ["POST /v1/audio/transcriptions", true],
-  ["POST /v1/audio/speech", true],
+  ["POST /v1/chat/completions", OPENAI_ROUTE],
+  ["POST /v1/audio/transcriptions", OPENAI_ROUTE],
+  ["POST /v1/audio/speech", OPENAI_ROUTE],
+  ["POST /v1beta/interactions", GEMINI_ROUTE],
 ]);
 
-if (!API_KEY) {
-  console.error("Missing OPENAI_API_KEY. Set it in the server environment and restart.");
+if (!API_KEY && !GEMINI_KEY) {
+  console.error("Set OPENAI_API_KEY and/or GEMINI_API_KEY in the server environment and restart.");
   process.exit(1);
 }
 
@@ -65,8 +75,12 @@ const server = http.createServer(async (req, res) => {
   const path = (req.url || "").split("?")[0];
   const routeKey = `${req.method} ${path}`;
 
-  if (!ALLOWED.has(routeKey)) {
+  const route = ALLOWED.get(routeKey);
+  if (!route) {
     return send(res, 404, "Not found");
+  }
+  if (!route.enabled()) {
+    return send(res, 503, "This service is not configured on the server");
   }
 
   if (PROXY_TOKEN && req.headers["x-proxy-token"] !== PROXY_TOKEN) {
@@ -80,7 +94,7 @@ const server = http.createServer(async (req, res) => {
     return send(res, err.status || 400, err.message);
   }
 
-  const headers = { Authorization: `Bearer ${API_KEY}` };
+  const headers = { ...route.auth() };
   // Forward only the content type. Never forward the client's own headers.
   if (req.headers["content-type"]) {
     headers["Content-Type"] = req.headers["content-type"];
@@ -88,7 +102,7 @@ const server = http.createServer(async (req, res) => {
 
   let upstream;
   try {
-    upstream = await fetch(`${UPSTREAM}${path}`, {
+    upstream = await fetch(`${route.upstream}${path}`, {
       method: req.method,
       headers,
       body,
@@ -105,5 +119,5 @@ const server = http.createServer(async (req, res) => {
 });
 
 server.listen(PORT, () => {
-  console.log(`Proxy listening on port ${PORT}, forwarding to ${UPSTREAM}`);
+  console.log(`Proxy listening on port ${PORT}. OpenAI -> ${UPSTREAM}, Gemini -> ${GEMINI_UPSTREAM}`);
 });
