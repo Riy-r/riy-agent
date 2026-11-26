@@ -32,7 +32,7 @@ import {
 import { transcribeAudio } from "@/services/speech-to-text";
 import { speak } from "@/services/text-to-speech";
 import { sanitizeTranscript, sanitizeUserInput } from "@/utils/sanitize";
-import type { AppLanguage, Translations } from "@/i18n/translations";
+import { withName, type AppLanguage, type Translations } from "@/i18n/translations";
 import type { Settings } from "@/hooks/useSettings";
 
 /** What the chat screen needs to render. */
@@ -101,7 +101,8 @@ export function useChat(settings: Settings, t: Translations) {
           profile,
           facts,
           language,
-          settings.memoryEnabled
+          settings.memoryEnabled,
+          settings.agentName
         );
 
         const reply = await sendChat(currentHistory, systemPrompt);
@@ -126,7 +127,7 @@ export function useChat(settings: Settings, t: Translations) {
           error instanceof AgentError && error.message.includes("API key")
             ? t.apiMissing
             : t.networkError;
-        Alert.alert(t.chatTitle, message);
+        Alert.alert(withName(t.chatTitle, settings.agentName), message);
       } finally {
         setIsThinking(false);
       }
@@ -162,7 +163,7 @@ export function useChat(settings: Settings, t: Translations) {
         );
         const clean = sanitizeTranscript(transcript);
         if (!clean) {
-          Alert.alert(t.chatTitle, t.transcribeError);
+          Alert.alert(withName(t.chatTitle, settings.agentName), t.transcribeError);
           return;
         }
 
@@ -172,7 +173,7 @@ export function useChat(settings: Settings, t: Translations) {
 
         await runAgentTurn(clean, settings.language);
       } catch {
-        Alert.alert(t.chatTitle, t.transcribeError);
+        Alert.alert(withName(t.chatTitle, settings.agentName), t.transcribeError);
       } finally {
         setIsTranscribing(false);
       }

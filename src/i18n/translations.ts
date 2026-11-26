@@ -8,6 +8,11 @@
 
 export type AppLanguage = "en" | "ar";
 
+/** Fill the agent's name into a string that contains {name}. */
+export function withName(text: string, name: string): string {
+  return text.split("{name}").join(name);
+}
+
 export const translations = {
   en: {
     // Tabs
@@ -15,7 +20,7 @@ export const translations = {
     settingsTab: "Settings",
 
     // Chat screen
-    chatTitle: "My AI Agent",
+    chatTitle: "{name}",
     inputPlaceholder: "Type a message…",
     send: "Send",
     thinking: "Thinking…",
@@ -25,12 +30,12 @@ export const translations = {
     holdToTalk: "Tap the mic and speak",
     micPermissionTitle: "Microphone permission",
     micPermissionBody:
-      "My AI Agent needs microphone access so you can talk to your agent.",
+      "{name} needs microphone access so you can talk to me.",
     recordError: "Sorry, I could not record audio. Please check permissions.",
     transcribeError: "Sorry, I could not understand the audio.",
     networkError:
       "I could not reach the AI service. Check your connection and API key.",
-    emptyChatTitle: "Hello! 👋",
+    emptyChatTitle: "Hi, I'm {name}! 👋",
     emptyChatBody:
       "Ask me anything, or tap the microphone and just talk. I can speak English and Arabic.",
 
@@ -41,7 +46,7 @@ export const translations = {
     languageAr: "العربية",
     voice: "Agent voice",
     testVoice: "Hear a sample",
-    voiceSample: "Hello! I am your AI agent. This is how my voice sounds.",
+    voiceSample: "Hi, I'm {name}. This is how my voice sounds.",
     apiBanner:
       "Voice and AI replies are off — add your OpenAI API key first. Tap for steps.",
     speakReplies: "Speak replies aloud",
@@ -82,7 +87,7 @@ export const translations = {
     settingsTab: "الإعدادات",
 
     // Chat screen
-    chatTitle: "وكيلي الذكي",
+    chatTitle: "{name}",
     inputPlaceholder: "اكتب رسالة…",
     send: "إرسال",
     thinking: "جارٍ التفكير…",
@@ -96,7 +101,7 @@ export const translations = {
     recordError: "عذراً، لم أتمكن من تسجيل الصوت. تحقق من الأذونات.",
     transcribeError: "عذراً، لم أفهم الصوت.",
     networkError: "تعذر الاتصال بالذكاء الاصطناعي. تحقق من الاتصال والمفتاح.",
-    emptyChatTitle: "مرحباً! 👋",
+    emptyChatTitle: "مرحباً، أنا {name}! 👋",
     emptyChatBody:
       "اسألني عن أي شيء، أو اضغط على المايك وتحدث. أتحدث العربية والإنجليزية.",
 
@@ -107,7 +112,7 @@ export const translations = {
     languageAr: "العربية",
     voice: "صوت الوكيل",
     testVoice: "جرّب الصوت",
-    voiceSample: "مرحباً! أنا وكيلك الذكي. هكذا يبدو صوتي.",
+    voiceSample: "مرحباً، أنا {name}. هكذا يبدو صوتي.",
     apiBanner:
       "الصوت والردود معطّلة — أضف مفتاح OpenAI أولاً. اضغط لخطوات الإعداد.",
     speakReplies: "قراءة الردود بصوت عالٍ",

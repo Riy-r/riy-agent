@@ -26,7 +26,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/constants/theme";
 import { useSettings } from "@/hooks/useSettings";
-import { translations } from "@/i18n/translations";
+import { translations, withName } from "@/i18n/translations";
 import { VOICES, speak } from "@/services/text-to-speech";
 import { getApiKey } from "@/services/ai";
 import { clearAllMemory, clearHistory } from "@/services/memory";
@@ -132,7 +132,7 @@ export default function SettingsScreen() {
           <TouchableOpacity
             style={styles.rowCard}
             onPress={() =>
-              void speak(t.voiceSample, settings.voiceId, settings.language)
+              void speak(withName(t.voiceSample, settings.agentName), settings.voiceId, settings.language)
             }
           >
             <Ionicons
