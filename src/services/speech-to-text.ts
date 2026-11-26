@@ -31,11 +31,9 @@ export async function transcribeAudio(
 
   // --- 2. Build the multipart form that Whisper expects ---
   const form = new FormData();
-  form.append("file", {
-    uri: fileUri,
-    name: "recording.m4a",
-    type: blob.type || "audio/mp4",
-  } as unknown as Blob);
+  // Send the Blob we already read. The old {uri, name, type} object is
+  // rejected by current React Native ("Unsupported FormDataPart").
+  form.append("file", blob, "recording.m4a");
   form.append("model", STT_MODEL);
   // Language hint: big accuracy boost for Arabic and English.
   form.append("language", language === "ar" ? "ar" : "en");
