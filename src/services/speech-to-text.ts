@@ -49,16 +49,22 @@ export async function transcribeAudio(
       headers: { ...proxyHeaders(), Authorization: `Bearer ${apiKey}` },
       body: form,
     });
-  } catch {
+  } catch (err) {
+    console.warn("[stt] network error:", String(err));
     throw new AgentError("Network request failed");
   }
 
   if (!response.ok) {
+    const detail = await response.text().catch(() => "");
+    console.warn("[stt] HTTP", response.status, detail.slice(0, 500));
     throw new AgentError(`API error ${response.status}`);
   }
 
   const data = (await response.json()) as { text?: string };
   const text = (data.text ?? "").trim();
-  if (!text) throw new AgentError("Empty transcript");
+  if (!text) {
+    console.warn("[stt] empty transcript:", JSON.stringify(data).slice(0, 300));
+    throw new AgentError("Empty transcript");
+  }
   return text;
 }
