@@ -28,6 +28,7 @@ export async function transcribeAudio(
   // --- 1. Read the recorded file as bytes (works on Android, iOS, web) ---
   const fileResponse = await fetch(fileUri);
   const blob = await fileResponse.blob();
+  console.log("[stt] blob size:", blob.size, "type:", blob.type);
 
   // --- 2. Build the multipart form that Whisper expects ---
   const form = new FormData();
