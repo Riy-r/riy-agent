@@ -50,6 +50,9 @@ export function useVoiceRecorder() {
       const permission = await AudioModule.requestRecordingPermissionsAsync();
       if (!permission.granted) return false;
 
+      // Re-enable recording right before each take. Playing a reply resets
+      // the audio session, which otherwise leaves the mic silent (empty file).
+      await setAudioModeAsync({ allowsRecording: true, playsInSilentMode: true });
       await recorder.prepareToRecordAsync();
       recorder.record();
       startedAt.current = Date.now();
