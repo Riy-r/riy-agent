@@ -33,6 +33,8 @@ export type Settings = {
   voiceId: string;
   memoryEnabled: boolean;
   speakReplies: boolean;
+  /** The agent's name. Shown in the title, greeting and system prompt. */
+  agentName: string;
 };
 
 /** Defaults for a fresh install. */
@@ -41,6 +43,7 @@ const DEFAULT_SETTINGS: Settings = {
   voiceId: "openai-coral",
   memoryEnabled: true,
   speakReplies: true,
+  agentName: "Byron",
 };
 
 const STORAGE_KEY = "@myaiagent/settings";

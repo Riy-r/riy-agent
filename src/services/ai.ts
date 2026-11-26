@@ -75,10 +75,11 @@ export function buildSystemPrompt(
   profile: MemoryProfile,
   facts: MemoryFact[],
   language: "en" | "ar",
-  memoryEnabled: boolean
+  memoryEnabled: boolean,
+  agentName: string = "Byron"
 ): string {
   const lines: string[] = [
-    "You are 'My AI Agent', a helpful, friendly and safe personal assistant.",
+    `You are '${agentName}', a helpful, friendly and safe personal assistant.`,
     "Rules you must always follow:",
     "- Refuse harmful, dangerous or illegal requests politely, and offer a safe alternative.",
     "- Be warm and encouraging. Ask a follow-up question when the request is unclear.",

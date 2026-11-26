@@ -38,7 +38,7 @@ import { theme } from "@/constants/theme";
 import { useSettings } from "@/hooks/useSettings";
 import { useChat } from "@/hooks/useChat";
 import { useVoiceRecorder } from "@/hooks/useVoiceRecorder";
-import { translations } from "@/i18n/translations";
+import { translations, withName } from "@/i18n/translations";
 import { MessageBubble } from "@/components/MessageBubble";
 import { MicButton } from "@/components/MicButton";
 
@@ -78,7 +78,7 @@ export default function ChatScreen() {
       if (uri) void sendVoice(uri);
     } else {
       const ok = await start();
-      if (!ok) Alert.alert(t.micPermissionTitle, t.micPermissionBody);
+      if (!ok) Alert.alert(t.micPermissionTitle, withName(t.micPermissionBody, settings.agentName));
     }
   }, [isRecording, start, stop, sendVoice, t]);
 
@@ -111,7 +111,7 @@ export default function ChatScreen() {
               <Ionicons name="sparkles" size={20} color={theme.text} />
             </View>
             <View>
-              <Text style={styles.title}>{t.chatTitle}</Text>
+              <Text style={styles.title}>{withName(t.chatTitle, settings.agentName)}</Text>
               <Text style={styles.subtitle}>
                 {isRecording
                   ? t.listening
@@ -157,7 +157,7 @@ export default function ChatScreen() {
         >
           {isEmpty ? (
             <View style={styles.empty}>
-              <Text style={styles.emptyTitle}>{t.emptyChatTitle}</Text>
+              <Text style={styles.emptyTitle}>{withName(t.emptyChatTitle, settings.agentName)}</Text>
               <Text style={styles.emptyBody}>{t.emptyChatBody}</Text>
             </View>
           ) : (
@@ -178,7 +178,7 @@ export default function ChatScreen() {
               styles.banner,
               pressed && styles.bannerPressed,
             ]}
-            onPress={() => Alert.alert(t.chatTitle, t.apiBanner)}
+            onPress={() => Alert.alert(withName(t.chatTitle, settings.agentName), t.apiBanner)}
           >
             <Ionicons name="key" size={16} color={theme.warning} />
             <Text style={styles.bannerText}>{t.apiBanner}</Text>
