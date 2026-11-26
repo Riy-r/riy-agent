@@ -22,7 +22,12 @@ import {
 import { MAX_RECORDING_SECONDS } from "@/constants/config";
 
 export function useVoiceRecorder() {
-  const recorder = useAudioRecorder(RecordingPresets.HIGH_QUALITY);
+  // Metering on: lets us see the microphone level (silence = about -160 dB).
+  const recorder = useAudioRecorder({
+    ...RecordingPresets.HIGH_QUALITY,
+    isMeteringEnabled: true,
+  });
+  const levelTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const [isRecording, setIsRecording] = useState(false);
   const maxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const startedAt = useRef<number>(0);
@@ -57,6 +62,10 @@ export function useVoiceRecorder() {
       recorder.record();
       startedAt.current = Date.now();
       setIsRecording(true);
+      levelTimer.current = setInterval(() => {
+        const st = recorder.getStatus();
+        console.log("[mic] level dB:", st.metering ?? "n/a", "t:", Date.now() - startedAt.current);
+      }, 1000);
 
       // Safety: stop automatically after MAX_RECORDING_SECONDS.
       maxTimer.current = setTimeout(() => {
@@ -75,6 +84,10 @@ export function useVoiceRecorder() {
     if (maxTimer.current) {
       clearTimeout(maxTimer.current);
       maxTimer.current = null;
+    }
+    if (levelTimer.current) {
+      clearInterval(levelTimer.current);
+      levelTimer.current = null;
     }
     if (!isRecording) return null;
 
