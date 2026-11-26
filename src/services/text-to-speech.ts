@@ -226,7 +226,10 @@ async function speakWithOpenAI(
 
   // Configure audio: keep playing even if the device ringer is on silent.
   try {
-    await setAudioModeAsync({ playsInSilentMode: true });
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      allowsRecording: false, // playback only; recording re-enables it
+    });
   } catch {
     // ignore - non-fatal
   }
