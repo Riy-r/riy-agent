@@ -22,6 +22,9 @@ export const CHAT_MODEL = "openai/gpt-oss-120b";
 // ---- Speech-to-text model (turns your voice recording into text) ----
 export const STT_MODEL = "whisper-large-v3";
 
+// ---- Video model (Gemini Omni Flash, via the proxy's /v1beta/interactions) ----
+export const VIDEO_MODEL = "gemini-omni-1.1-flash";
+
 // ---- Text-to-speech model (makes the agent talk back) ----
 export const TTS_MODEL = "gpt-4o-mini-tts";
 
